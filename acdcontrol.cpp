@@ -78,11 +78,17 @@ struct DeviceId {
   Product product;
   Vendor vendor;
   string description;
-  
-  DeviceId ( Vendor vendor_, Product product_, string description_ )
+  int brightness_min;
+  int brightness_max;
+
+  DeviceId ( Vendor vendor_, Product product_, string description_,
+		 int brightness_min = 0, int brightness_max = 255 )
     : product( product_ )
     , vendor( vendor_ )
-    , description( description_ ) { }
+    , description( description_ )
+	, brightness_min(brightness_min)
+	, brightness_max(brightness_max)
+	{ }
 
   bool operator < ( const DeviceId& other ) const {
     return (vendor < other.vendor) || 
@@ -106,13 +112,15 @@ bool number( const char* str ){
   return ((*str >= '0') && (*str <= '9')) || (*str == '+') || (*str == '-');
 }
 
-/** @return true if the device is in our database */
-bool is_supported ( const hiddev_devinfo& device_info ) {
+/** @return a non-NULL DeviceID ptr if the device is in our database */
+const DeviceId* is_supported ( const hiddev_devinfo& device_info ) {
   Product product = device_info.product & 0xFFFF;
   Vendor vendor = device_info.vendor & 0xFFFF;
 
-  return supportedDevices.find( DeviceId( vendor, product, "" )) != 
-    supportedDevices.end();
+  SupportedDevices::const_iterator i = supportedDevices.find( DeviceId( vendor, product, "" ));
+  if (i != supportedDevices.end())
+	  return &*i;
+  return 0;
 }
 
 /**
@@ -321,6 +329,8 @@ int main (int argc, char **argv) {
   int c;
   int digit_optind = 0;
 
+  const DeviceId* selected_device = 0;
+
   init_device_database();
   
   while (1) {
@@ -437,7 +447,7 @@ int main (int argc, char **argv) {
       continue;
     }
 
-    if ( !is_supported ( device_info ) ){
+    if ( not (selected_device = is_supported ( device_info )) ){
       cerr << "Device unsupported:";
       format_device(cerr, device_info);
       if ( !force )
@@ -468,7 +478,7 @@ int main (int argc, char **argv) {
     rep_info.report_type = HID_REPORT_TYPE_FEATURE;
     rep_info.report_id = BRIGHTNESS_CONTROL;
     rep_info.num_fields = 1;
-    
+
     if ( mode == SET ) {
       if ( ioctl(fd, HIDIOCSUSAGE, &usage_ref) < 0 ) {
         perror ("Usage failed!");
@@ -489,10 +499,10 @@ int main (int argc, char **argv) {
       }
       if ( mode == SETREL ) {
         brightness = usage_ref.value + amount;
-        brightness = max( 0, brightness);
-        brightness = min( 255, brightness);
+        brightness = max( selected_device->brightness_min, brightness);
+        brightness = min( selected_device->brightness_max, brightness);
         usage_ref.value = brightness;
-        
+
         /* set calculated brightness */
         if ( ioctl(fd, HIDIOCSUSAGE, &usage_ref) < 0 ) {
           perror ("Usage failed!");
@@ -545,7 +555,7 @@ void init_device_database() {
   supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_30,
                                      "Apple Cinema HD Display 30\"" ));
   supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_27,
-                                     "Apple Cinema HD Display 27\"" ));
+                                     "Apple Cinema HD Display 27\"", 0, 1024 ));
   supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_HD_27,
                                      "Apple Cinema HD Display 27\"" ));
   supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_LED_24,
