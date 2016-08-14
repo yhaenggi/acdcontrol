@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# acdcontrol:        Configures the brightness of displays connected via USB
+#
+# chkconfig: 35 95 95
+#
+# description:       acdcontrol is a program capable of configuring the brightness of \
+#                    TFT flat panel displays connected to the PC via USB. \
+#                    Activating this "service", your preferred brightness will be read \
+#                    from /etc/sysconfig/acdcontrol and set at boot time. \
+#                    Currently most Apple Studio, Cinema and Cinema HD Displays are \
+#                    supported, as well as some Samsung TFTs.
+
+[ -f /etc/sysconfig/acdcontrol ] || exit 0
+. /etc/sysconfig/acdcontrol
+
+# Continue only if device set.
+[ -z "${HID_DEVICES}" ] && exit 0
+
+# Default brightness.
+[ -z "${BRIGHTNESS}" ] && BRIGHTNESS="127"
+
+# Evaluate options:
+OPTIONS="--silent"
+[ ! -z "${FORCE}" ] && [ ${FORCE} -gt 0 ] && OPTIONS="$OPTIONS --force"
+
+# Source function library.
+. /etc/init.d/functions
+
+case "$1" in
+	start)
+		for i in $HID_DEVICES; do
+			echo -n $"Configuring brightness of display $i: "
+			/usr/bin/acdcontrol $OPTIONS "$i" "$BRIGHTNESS"
+			RETVAL=$?
+			if [ "$RETVAL" -eq 0 ]; then
+				action "" /bin/true
+			else
+				action "" /bin/false
+			fi
+		done
+	;;
+esac
+
+exit $RETVAL

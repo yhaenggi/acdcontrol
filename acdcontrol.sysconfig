@@ -1,0 +1,9 @@
+# HID device[s] of the displa[s] to control, separated by spaces:
+#HID_DEVICES="/dev/hiddev0"
+
+# Brightness to set the display[s] to:
+BRIGHTNESS="127"
+
+# Force setting of the brightness even on unsupported displays
+# (Take care, might be dangerous!):
+#FORCE=1
