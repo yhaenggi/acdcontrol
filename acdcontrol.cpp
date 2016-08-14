@@ -60,6 +60,7 @@ const int CINEMA_DISPLAY_20_NEW           = 0x9219;
 const int CINEMA_DISPLAY_24               = 0x921e;
 const int CINEMA_DISPLAY_30               = 0x9232;
 const int CINEMA_DISPLAY_27               = 0x9226;
+const int CINEMA_DISPLAY_HD_27            = 0x9223;
 
 const int S1                              = 0x8002;
 
@@ -542,6 +543,8 @@ void init_device_database() {
   supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_30,
                                      "Apple Cinema HD Display 30\"" ));
   supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_27,
+                                     "Apple Cinema HD Display 27\"" ));
+  supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_HD_27,
                                      "Apple Cinema HD Display 27\"" ));
 
   supportedDevices.insert( DeviceId( SAMSUNG, S1,
