@@ -62,6 +62,7 @@ const int CINEMA_DISPLAY_30               = 0x9232;
 const int CINEMA_DISPLAY_27               = 0x9226;
 const int CINEMA_DISPLAY_HD_27            = 0x9223;
 const int CINEMA_DISPLAY_LED_24           = 0x9236;
+const int CINEMA_DISPLAY_HD_27_2013       = 0x9227;
 
 const int S1                              = 0x8002;
 
@@ -549,6 +550,8 @@ void init_device_database() {
                                      "Apple Cinema HD Display 27\"" ));
   supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_LED_24,
                                      "Apple LED Cinema Display 24\"" ));
+  supportedDevices.insert( DeviceId( APPLE, CINEMA_DISPLAY_HD_27_2013,
+                                     "Apple Cinema HD Display 27\"" ));
 
   supportedDevices.insert( DeviceId( SAMSUNG, S1,
                                      "Samsung SyncMaster 757NF" ));
